@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>보육취업 - 보육교사 올인원 취업 & 적응 플랫폼</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Alpine.js CDN -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- Google Fonts (Noto Sans KR) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            mint: {
+              50: '#F0FBF9',
+              100: '#DDF4F1',
+              200: '#BDE8E3',
+              400: '#4ED3C7',
+              500: '#2EC4B6',
+              600: '#26A99D',
+              700: '#1D8279',
+            },
+            amber: {
+              50: '#FFFDF5',
+              100: '#FFF7DD',
+              200: '#FFEAA8',
+              400: '#FFCD75',
+              500: '#FFBF69',
+              600: '#E5A44E',
+            },
+            slate: {
+              700: '#3D405B',
+              800: '#2B2D42',
+              900: '#1F2030',
+            }
+          },
+          fontFamily: {
+            sans: ['Noto Sans KR', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom scrollbar & smooth transitions */
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #F3F4F6;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.03); opacity: 0.95; }
+    }
+    .pulse-glow {
+      animation: pulseGlow 2.5s infinite ease-in-out;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen text-slate-800 flex justify-center selection:bg-mint-100 selection:text-mint-700">
+
+  <!-- Mobile Container Root -->
+  <div 
+    x-data="appData()" 
+    x-init="initApp()" 
+    class="w-full max-w-md bg-white min-h-screen shadow-2xl relative flex flex-col pb-24 border-x border-gray-200"
+  >
+    
+    <!-- HEADER BAR -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-3.5 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-mint-500 to-amber-500 flex items-center justify-center text-white shadow-md shadow-mint-500/20 font-extrabold text-sm">
+          보육
+        </div>
+        <div>
+          <span class="font-bold text-lg tracking-tight text-slate-800">보육취업</span>
+          <span class="text-[10px] bg-mint-100 text-mint-700 font-semibold px-1.5 py-0.5 rounded-md ml-1">올인원</span>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <!-- Region Badge -->
+        <button 
+          @click="openGoalModal = true"
+          class="flex items-center space-x-1 text-xs font-semibold bg-gray-100 text-slate-700 px-2.5 py-1.5 rounded-full hover:bg-mint-50 hover:text-mint-700 transition"
+        >
+          <i data-lucide="map-pin" class="w-3.5 h-3.5 text-mint-600"></i>
+          <span x-text="userGoal.region">안산시 단원구</span>
+          <i data-lucide="chevron-down" class="w-3 h-3 text-gray-400"></i>
+        </button>
+
+        <!-- Notification Bell -->
+        <button @click="showToast('새로운 맞춤 채용공고 2건이 도착했습니다!')" class="relative p-1.5 text-gray-500 hover:text-slate-800 transition">
+          <i data-lucide="bell" class="w-5 h-5"></i>
+          <span class="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA (DYNAMIC TAB SWITCHING) -->
+    <main class="flex-1 overflow-y-auto">
+
+      <!-- ========================================== -->
+      <!-- TAB 1: 🏠 [홈 - 취업 대시보드] -->
+      <!-- ========================================== -->
+      <section x-show="tab === 'home'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" class="p-4 space-y-4">
+        
+        <!-- Welcome & Goal Card -->
+        <div class="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 text-white p-4 rounded-2xl shadow-lg relative overflow-hidden">
+          <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-mint-500/20 rounded-full blur-2xl"></div>
+          <div class="flex justify-between items-start mb-3 relative z-10">
+            <div>
+              <p class="text-xs text-mint-400 font-medium">선생님을 위한 맞춤 대시보드</p>
+              <h2 class="text-lg font-bold mt-0.5">반가워요, 김보육 선생님! 👋</h2>
+            </div>
+            <button @click="openGoalModal = true" class="text-xs bg-white/10 hover:bg-white/20 text-gray-200 px-2.5 py-1 rounded-lg border border-white/10 backdrop-blur-sm transition flex items-center space-x-1">
+              <i data-lucide="sliders-horizontal" class="w-3 h-3"></i>
+              <span>목표 수정</span>
+            </button>
+          </div>
+
+          <!-- Goal Summary Badge Card -->
+          <div class="bg-white/10 rounded-xl p-3 backdrop-blur-md border border-white/10 relative z-10">
+            <p class="text-[11px] text-gray-300 mb-1 flex items-center">
+              <i data-lucide="target" class="w-3 h-3 mr-1 text-amber-400"></i> 내 취업 목표 설정
+            </p>
+            <div class="text-xs font-semibold text-white flex flex-wrap gap-1.5">
+              <span class="bg-mint-500/30 text-mint-200 border border-mint-400/30 px-2 py-0.5 rounded" x-text="userGoal.region">안산시</span>
+              <span class="bg-amber-500/30 text-amber-200 border border-amber-400/30 px-2 py-0.5 rounded" x-text="userGoal.type">직장/국공립</span>
+              <span class="bg-white/20 text-gray-100 px-2 py-0.5 rounded" x-text="userGoal.level">신입</span>
+              <span class="bg-white/20 text-gray-100 px-2 py-0.5 rounded" x-text="userGoal.ageGroup">만 1~2세</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 취업 준비도 Widget -->
+        <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="font-bold text-sm text-slate-800 flex items-center">
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-500 mr-1.5"></i>
+              내 취업 준비도
+            </h3>
+            <span class="text-xs font-extrabold text-mint-600 bg-mint-50 px-2 py-0.5 rounded-full" x-text="readinessPercentage + '% 완료'">68% 완료</span>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="w-full bg-gray-100 h-3 rounded-full overflow-hidden mb-3.5">
+            <div class="bg-gradient-to-r from-mint-500 to-mint-400 h-full rounded-full transition-all duration-700 ease-out" :style="'width: ' + readinessPercentage + '%'"></div>
+          </div>
+
+          <!-- Status Badges Grid -->
+          <div class="grid grid-cols-2 gap-2 text-xs mb-3">
+            <div class="flex items-center justify-between p-2 rounded-xl bg-emerald-50/60 border border-emerald-100">
+              <span class="text-gray-600 font-medium">보육자격증</span>
+              <span class="font-bold text-emerald-600 flex items-center">100% <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1"></span></span>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded-xl bg-emerald-50/60 border border-emerald-100">
+              <span class="text-gray-600 font-medium">이력서</span>
+              <span class="font-bold text-emerald-600 flex items-center">90% <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1"></span></span>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded-xl bg-amber-50/60 border border-amber-100">
+              <span class="text-gray-600 font-medium">자기소개서</span>
+              <span class="font-bold text-amber-600 flex items-center">70% <span class="w-1.5 h-1.5 rounded-full bg-amber-500 ml-1"></span></span>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded-xl bg-rose-50/60 border border-rose-100">
+              <span class="text-gray-600 font-medium">모의면접</span>
+              <span class="font-bold text-rose-600 flex items-center">30% <span class="w-1.5 h-1.5 rounded-full bg-rose-500 ml-1"></span></span>
+            </div>
+          </div>
+
+          <!-- AI 추천 Action Banner -->
+          <div @click="switchTab('ai')" class="cursor-pointer bg-gradient-to-r from-mint-50 to-amber-50 border border-mint-200/60 p-3 rounded-xl flex items-center justify-between group hover:border-mint-400 transition">
+            <div class="flex items-start space-x-2.5">
+              <div class="p-1.5 bg-mint-500 text-white rounded-lg mt-0.5 shadow-sm">
+                <i data-lucide="bot" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <p class="text-[11px] font-bold text-mint-700">AI 취업 코치 가이드</p>
+                <p class="text-xs font-semibold text-slate-800 leading-tight">"자기소개서 3번 항목이 비어있어요. AI와 작성해볼까요?"</p>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-mint-600 group-hover:translate-x-0.5 transition"></i>
+          </div>
+        </div>
+
+        <!-- 맞춤 공고 Top 2 카드 -->
+        <div>
+          <div class="flex justify-between items-center mb-2.5">
+            <h3 class="font-bold text-sm text-slate-800">나에게 딱 맞는 공고 <span class="text-mint-600">Top 2</span></h3>
+            <button @click="switchTab('jobs')" class="text-xs text-gray-500 hover:text-mint-600 flex items-center font-medium">
+              더보기 <i data-lucide="chevron-right" class="w-3.5 h-3.5 ml-0.5"></i>
+            </button>
+          </div>
+
+          <div class="space-y-2.5">
+            <template x-for="job in featuredJobs" :key="job.id">
+              <div @click="openJobDetail(job)" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition cursor-pointer relative overflow-hidden">
+                <!-- Top Match Badge -->
+                <div class="flex justify-between items-start mb-2">
+                  <div class="flex items-center space-x-1.5">
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-mint-100 text-mint-700" x-text="job.facilityType">국공립</span>
+                    <span class="text-[10px] font-medium text-gray-500" x-text="job.dDay">D-3</span>
+                  </div>
+                  <span class="text-xs font-extrabold text-mint-600 bg-mint-50 border border-mint-200 px-2 py-0.5 rounded-full" x-text="'매칭률 ' + job.matchScore + '%'">
+                    매칭률 95%
+                  </span>
+                </div>
+
+                <h4 class="font-bold text-slate-800 text-sm mb-1" x-text="job.name">시립안산어린이집</h4>
+                <p class="text-xs text-gray-500 mb-2.5">
+                  <span x-text="job.targetAge">만 2세 담임</span> · <span x-text="job.jobType">정규직</span> · <span x-text="job.salary">월 240~260만원</span>
+                </p>
+
+                <!-- Tags -->
+                <div class="flex flex-wrap gap-1">
+                  <template x-for="tag in job.tags" :key="tag">
+                    <span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded" x-text="tag">#희망지역일치</span>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- 오늘의 3분 면접 대비 카드 -->
+        <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center space-x-1.5">
+              <div class="w-6 h-6 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-xs">
+                <i data-lucide="help-circle" class="w-4 h-4"></i>
+              </div>
+              <h3 class="font-bold text-sm text-slate-800">오늘의 3분 면접 대비</h3>
+            </div>
+            <span class="text-[10px] bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded-full">매일 업데이트</span>
+          </div>
+
+          <p class="text-xs font-semibold text-slate-700 bg-gray-50 p-3 rounded-xl border border-gray-100 mb-3 leading-relaxed">
+            "아동 간 다툼이 일어났을 때 학부모님께 어떻게 설명하시겠습니까?"
+          </p>
+
+          <div x-data="{ showAnswerTip: false }">
+            <button @click="showAnswerTip = !showAnswerTip" class="w-full text-xs py-2 bg-slate-800 text-white rounded-xl font-medium hover:bg-slate-700 transition flex items-center justify-center space-x-1">
+              <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span x-text="showAnswerTip ? '답변 꿀팁 접기' : 'AI 모범 답변 & 핵심 답변 팁 보기'">AI 모범 답변 & 핵심 답변 팁 보기</span>
+            </button>
+
+            <div x-show="showAnswerTip" x-collapse class="mt-2.5 p-3 bg-mint-50/70 border border-mint-100 rounded-xl text-xs space-y-2">
+              <p class="font-bold text-mint-700">💡 핵심 3단계 답변 가이드:</p>
+              <ol class="list-decimal list-inside space-y-1 text-slate-700 leading-relaxed">
+                <li><b>상황 객관적 전달:</b> 감정적 표현 제외, 일시·상황을 사실대로 설명</li>
+                <li><b>교사의 즉각 조치:</b> 아이 상처/상태 확인 및 즉시 중재 내역 안내</li>
+                <li><b>재발 방지 약속:</b> 원내 중점 관찰 계획과 따뜻한 위로 전달</li>
+              </ol>
+              <div class="pt-1">
+                <button @click="switchTab('ai')" class="text-[11px] text-mint-700 underline font-semibold hover:text-mint-800">
+                  👉 AI 모의면접 탭에서 이 질문 직접 연습하기
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 2: 💼 [채용공고] -->
+      <!-- ========================================== -->
+      <section x-show="tab === 'jobs'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" class="p-4 space-y-3.5">
+        
+        <!-- Search & Filter Bar -->
+        <div class="space-y-2">
+          <!-- Search Input -->
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3.5 top-3"></i>
+            <input 
+              type="text" 
+              x-model="searchQuery" 
+              placeholder="어린이집명, 지역, 직무 검색..." 
+              class="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2 text-xs focus:outline-none focus:border-mint-500 focus:ring-1 focus:ring-mint-500 shadow-sm"
+            >
+          </div>
+
+          <!-- Filter Badges Horizontal Scroll -->
+          <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1 text-xs">
+            <button 
+              @click="selectedFilter = 'all'" 
+              :class="selectedFilter === 'all' ? 'bg-mint-500 text-white font-bold' : 'bg-white text-gray-600 border border-gray-200'"
+              class="px-3 py-1.5 rounded-full whitespace-nowrap transition shadow-xs"
+            >
+              전체
+            </button>
+            <button 
+              @click="selectedFilter = 'ansan'" 
+              :class="selectedFilter === 'ansan' ? 'bg-mint-500 text-white font-bold' : 'bg-white text-gray-600 border border-gray-200'"
+              class="px-3 py-1.5 rounded-full whitespace-nowrap transition shadow-xs flex items-center"
+            >
+              <i data-lucide="check" class="w-3 h-3 mr-1" x-show="selectedFilter === 'ansan'"></i>
+              지역: 안산시
+            </button>
+            <button 
+              @click="selectedFilter = 'public'" 
+              :class="selectedFilter === 'public' ? 'bg-mint-500 text-white font-bold' : 'bg-white text-gray-600 border border-gray-200'"
+              class="px-3 py-1.5 rounded-full whitespace-nowrap transition shadow-xs"
+            >
+              국공립/직장
+            </button>
+            <button 
+              @click="selectedFilter = 'beginner'" 
+              :class="selectedFilter === 'beginner' ? 'bg-mint-500 text-white font-bold' : 'bg-white text-gray-600 border border-gray-200'"
+              class="px-3 py-1.5 rounded-full whitespace-nowrap transition shadow-xs"
+            >
+              신입가능
+            </button>
+            <button 
+              @click="selectedFilter = 'saved'" 
+              :class="selectedFilter === 'saved' ? 'bg-rose-500 text-white font-bold' : 'bg-white text-gray-600 border border-gray-200'"
+              class="px-3 py-1.5 rounded-full whitespace-nowrap transition shadow-xs flex items-center"
+            >
+              <i data-lucide="heart" class="w-3 h-3 mr-1 fill-current"></i>
+              관심공고만
+            </button>
+          </div>
+        </div>
+
+        <!-- Listing Stats Header -->
+        <div class="flex justify-between items-center px-1 text-xs text-gray-500">
+          <span>총 <strong class="text-slate-800" x-text="filteredJobs.length">4</strong>건의 추천 채용공고</span>
+          <span class="text-[11px] text-mint-600 font-medium">✨ 매칭 순 정렬</span>
+        </div>
+
+        <!-- Job Cards List -->
+        <div class="space-y-3">
+          <template x-for="job in filteredJobs" :key="job.id">
+            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition relative">
+              
+              <!-- Card Header -->
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <div class="flex items-center space-x-1.5 mb-1">
+                    <span 
+                      class="text-[10px] font-bold px-2 py-0.5 rounded"
+                      :class="job.facilityType === '국공립' ? 'bg-mint-100 text-mint-700' : (job.facilityType === '직장' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700')"
+                      x-text="job.facilityType"
+                    >국공립</span>
+                    <span class="text-[10px] font-bold bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded" x-text="job.dDay">D-3</span>
+                    <span class="text-[10px] text-gray-400" x-text="job.location">안산시 단원구</span>
+                  </div>
+                  <h3 @click="openJobDetail(job)" class="font-bold text-slate-800 text-sm hover:text-mint-600 cursor-pointer transition" x-text="job.name">
+                    시립안산어린이집
+                  </h3>
+                </div>
+
+                <!-- Heart Toggle Button -->
+                <button @click.stop="toggleBookmark(job.id)" class="p-1.5 rounded-full hover:bg-rose-50 transition">
+                  <i 
+                    data-lucide="heart" 
+                    class="w-5 h-5 transition"
+                    :class="bookmarks.includes(job.id) ? 'text-rose-500 fill-rose-500' : 'text-gray-300'"
+                  ></i>
+                </button>
+              </div>
+
+              <!-- Details Summary -->
+              <div class="bg-gray-50 p-2.5 rounded-xl text-xs space-y-1 mb-3">
+                <div class="flex justify-between">
+                  <span class="text-gray-500">담당학급 / 형태:</span>
+                  <span class="font-semibold text-slate-700" x-text="job.targetAge + ' (' + job.jobType + ')'">만 2세 담임 (정규직)</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-500">급여조건:</span>
+                  <span class="font-bold text-mint-700" x-text="job.salary">월 240~260만원</span>
+                </div>
+              </div>
+
+              <!-- Tags & Detail Button -->
+              <div class="flex justify-between items-center">
+                <div class="flex flex-wrap gap-1">
+                  <template x-for="tag in job.tags" :key="tag">
+                    <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded" x-text="tag">#희망지역일치</span>
+                  </template>
+                </div>
+
+                <button @click="openJobDetail(job)" class="text-xs bg-slate-800 hover:bg-slate-700 text-white font-medium px-3 py-1.5 rounded-lg transition flex items-center">
+                  상세보기
+                </button>
+              </div>
+
+            </div>
+          </template>
+
+          <div x-show="filteredJobs.length === 0" class="bg-white rounded-2xl p-8 text-center text-gray-400 space-y-2 border border-gray-100">
+            <i data-lucide="search-x" class="w-8 h-8 mx-auto text-gray-300"></i>
+            <p class="text-xs font-medium">검색 조건에 맞는 공고가 없습니다.</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 3: 📝 [AI 서류 & 면접] -->
+      <!-- ========================================== -->
+      <section x-show="tab === 'ai'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" class="p-4 space-y-4">
+        
+        <!-- Segment Control Tabs inside AI Tab -->
+        <div class="bg-gray-200/80 p-1 rounded-xl flex text-xs font-semibold">
+          <button 
+            @click="aiSubTab = 'convert'" 
+            :class="aiSubTab === 'convert' ? 'bg-white text-slate-800 shadow-sm' : 'text-gray-600 hover:text-slate-800'"
+            class="flex-1 py-2 rounded-lg transition text-center"
+          >
+            AI 역량 변환기
+          </button>
+          <button 
+            @click="aiSubTab = 'tone'" 
+            :class="aiSubTab === 'tone' ? 'bg-white text-slate-800 shadow-sm' : 'text-gray-600 hover:text-slate-800'"
+            class="flex-1 py-2 rounded-lg transition text-center"
+          >
+            자소서 톤 튜닝
+          </button>
+          <button 
+            @click="aiSubTab = 'interview'" 
+            :class="aiSubTab === 'interview' ? 'bg-white text-slate-800 shadow-sm' : 'text-gray-600 hover:text-slate-800'"
+            class="flex-1 py-2 rounded-lg transition text-center"
+          >
+            AI 모의면접
+          </button>
+        </div>
+
+        <!-- [기능 A] AI 경험-역량 변환기 -->
+        <div x-show="aiSubTab === 'convert'" class="space-y-3">
+          <div class="bg-gradient-to-r from-mint-500 to-mint-600 text-white p-4 rounded-2xl shadow-sm">
+            <div class="flex items-center space-x-2 mb-1">
+              <i data-lucide="sparkles" class="w-5 h-5 text-amber-300"></i>
+              <h3 class="font-bold text-sm">경험-보육역량 AI 변환기</h3>
+            </div>
+            <p class="text-xs text-mint-100 leading-relaxed">
+              아르바이트나 봉사활동, 팀 프로젝트 경험을 입력하면 보육교사에 딱 맞는 전문 역량 문장으로 변환해 드려요!
+            </p>
+          </div>
+
+          <!-- Input Form -->
+          <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
+            <div>
+              <label class="text-xs font-bold text-slate-700 block mb-1.5">선생님의 일상 경험 입력</label>
+              <!-- Preset Quick Selection -->
+              <div class="flex flex-wrap gap-1.5 mb-2">
+                <button @click="rawExperienceInput = '카페 아르바이트 1년 동안 손님 응대하고 음료 제조함'" class="text-[11px] bg-gray-100 hover:bg-mint-50 hover:text-mint-700 text-gray-600 px-2 py-1 rounded-md transition">
+                  ☕ 카페 아르바이트 1년
+                </button>
+                <button @click="rawExperienceInput = '어린이 도서관 주말 아이들 책 읽어주기 봉사활동 6개월 함'" class="text-[11px] bg-gray-100 hover:bg-mint-50 hover:text-mint-700 text-gray-600 px-2 py-1 rounded-md transition">
+                  📚 도서관 아이들 봉사활동
+                </button>
+                <button @click="rawExperienceInput = '대학 팀프로젝트 조장 맡아서 팀원 간 갈등 조율하고 발표 완수함'" class="text-[11px] bg-gray-100 hover:bg-mint-50 hover:text-mint-700 text-gray-600 px-2 py-1 rounded-md transition">
+                  🎓 조별과제 갈등 조율 경험
+                </button>
+              </div>
+
+              <textarea 
+                x-model="rawExperienceInput"
+                rows="3" 
+                placeholder="예: 카페 아르바이트 1년 동안 다양한 손님을 친절하게 응대함" 
+                class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs focus:outline-none focus:border-mint-500 focus:bg-white transition"
+              ></textarea>
+            </div>
+
+            <button 
+              @click="runAiConvert()" 
+              :disabled="isConverting"
+              class="w-full bg-mint-500 hover:bg-mint-600 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow-md shadow-mint-500/20"
+            >
+              <i data-lucide="wand-2" class="w-4 h-4" x-show="!isConverting"></i>
+              <i data-lucide="loader-2" class="w-4 h-4 animate-spin" x-show="isConverting"></i>
+              <span x-text="isConverting ? '보육 역량으로 변환 중...' : 'AI 역량 변환하기'">AI 역량 변환하기</span>
+            </button>
+          </div>
+
+          <!-- Result Output Card -->
+          <div x-show="convertedResult" class="bg-white rounded-2xl p-4 border border-mint-200 shadow-md space-y-2.5 relative">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold text-mint-700 flex items-center">
+                <i data-lucide="check-circle-2" class="w-4 h-4 mr-1"></i> AI 변환 완료 문장
+              </span>
+              <button @click="copyToClipboard(convertedResult)" class="text-[11px] text-gray-500 hover:text-mint-600 flex items-center">
+                <i data-lucide="copy" class="w-3.5 h-3.5 mr-0.5"></i> 복사하기
+              </button>
+            </div>
+
+            <p class="text-xs font-semibold text-slate-800 bg-mint-50/70 p-3 rounded-xl border border-mint-100 leading-relaxed" x-text="convertedResult">
+              "다양한 고객과의 소통 경험을 바탕으로 학부모 응대 및 돌발 상황 대처 능력을 갖춤"
+            </p>
+
+            <div class="bg-gray-50 p-2.5 rounded-xl text-[11px] text-gray-600">
+              <strong class="text-slate-700">📌 자소서 추천 반영 항목:</strong> 성격의 장단점, 대인관계 능력, 돌발상황 해결사례
+            </div>
+          </div>
+        </div>
+
+        <!-- [기능 B] 어린이집 유형별 자소서 톤 튜닝 -->
+        <div x-show="aiSubTab === 'tone'" class="space-y-3">
+          <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-800">어린이집 유형별 맞춤 자소서 톤</h3>
+            <p class="text-xs text-gray-500">지원하고자 하는 어린이집 유형을 선택하면 평가위원이 선호하는 핵심 키워드와 톤을 제안합니다.</p>
+
+            <!-- Facility Type Buttons -->
+            <div class="grid grid-cols-3 gap-2">
+              <button 
+                @click="toneType = 'public'" 
+                :class="toneType === 'public' ? 'bg-mint-500 text-white font-bold shadow-md shadow-mint-500/20' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                class="py-2.5 rounded-xl text-xs transition text-center"
+              >
+                🏛️ 국공립용
+              </button>
+              <button 
+                @click="toneType = 'corporate'" 
+                :class="toneType === 'corporate' ? 'bg-mint-500 text-white font-bold shadow-md shadow-mint-500/20' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                class="py-2.5 rounded-xl text-xs transition text-center"
+              >
+                🏢 직장용
+              </button>
+              <button 
+                @click="toneType = 'home'" 
+                :class="toneType === 'home' ? 'bg-mint-500 text-white font-bold shadow-md shadow-mint-500/20' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                class="py-2.5 rounded-xl text-xs transition text-center"
+              >
+                🏡 가정/민간용
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic Tone Content -->
+          <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
+            <!-- Public Type -->
+            <template x-if="toneType === 'public'">
+              <div class="space-y-2.5">
+                <div class="flex items-center space-x-2 text-mint-700 font-bold text-xs">
+                  <span class="px-2 py-0.5 rounded bg-mint-100">국공립 어린이집 평가 포인트</span>
+                </div>
+                <p class="text-xs text-slate-700 leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100">
+                  <b>핵심 톤:</b> "공공성, 규정 준수, 보육일지 성실성, 안전의식"<br>
+                  국공립은 국가 보육지침 준수와 안전 및 아동학대 예방 교육 준수의 엄격한 자세가 강조됩니다.
+                </p>
+                <div class="text-xs space-y-1">
+                  <p class="font-bold text-slate-800">✨ 추천 키워드:</p>
+                  <div class="flex flex-wrap gap-1">
+                    <span class="bg-mint-50 text-mint-700 px-2 py-0.5 rounded text-[11px] font-medium">#보육지침준수</span>
+                    <span class="bg-mint-50 text-mint-700 px-2 py-0.5 rounded text-[11px] font-medium">#투명한일지작성</span>
+                    <span class="bg-mint-50 text-mint-700 px-2 py-0.5 rounded text-[11px] font-medium">#안전관리책임감</span>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- Corporate Type -->
+            <template x-if="toneType === 'corporate'">
+              <div class="space-y-2.5">
+                <div class="flex items-center space-x-2 text-blue-700 font-bold text-xs">
+                  <span class="px-2 py-0.5 rounded bg-blue-100">직장 어린이집 평가 포인트</span>
+                </div>
+                <p class="text-xs text-slate-700 leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100">
+                  <b>핵심 톤:</b> "학부모(임직원) 서비스 마인드, 야간/연장 보육 융통성, 체계적 소통"<br>
+                  임직원 학부모의 높은 요구수준에 맞춘 친절한 응대와 유연하고 전문적인 태도를 원합니다.
+                </p>
+                <div class="text-xs space-y-1">
+                  <p class="font-bold text-slate-800">✨ 추천 키워드:</p>
+                  <div class="flex flex-wrap gap-1">
+                    <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[11px] font-medium">#임직원학부모응대</span>
+                    <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[11px] font-medium">#유연한연장보육</span>
+                    <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[11px] font-medium">#체계적원아관찰</span>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- Home Type -->
+            <template x-if="toneType === 'home'">
+              <div class="space-y-2.5">
+                <div class="flex items-center space-x-2 text-amber-700 font-bold text-xs">
+                  <span class="px-2 py-0.5 rounded bg-amber-100">가정/민간 어린이집 평가 포인트</span>
+                </div>
+                <p class="text-xs text-slate-700 leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100">
+                  <b>핵심 톤:</b> "따뜻한 정서적 교감, 동료 교사 협동, 영아 밀착 돌봄"<br>
+                  영아 중심의 가정적 분위기와 원장님 및 소수 동료교사와의 가족 같은 팀워크를 중시합니다.
+                </p>
+                <div class="text-xs space-y-1">
+                  <p class="font-bold text-slate-800">✨ 추천 키워드:</p>
+                  <div class="flex flex-wrap gap-1">
+                    <span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded text-[11px] font-medium">#영아정서애착</span>
+                    <span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded text-[11px] font-medium">#가족같은동료애</span>
+                    <span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded text-[11px] font-medium">#세심한상태체크</span>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+          </div>
+        </div>
+
+        <!-- [기능 C] AI 모의면접 피드백 시뮬레이션 -->
+        <div x-show="aiSubTab === 'interview'" class="space-y-3">
+          <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-800 flex items-center">
+              <i data-lucide="video" class="w-4 h-4 text-mint-600 mr-1.5"></i>
+              AI 면접 시뮬레이터
+            </h3>
+
+            <!-- Question Select -->
+            <div>
+              <label class="text-xs font-bold text-slate-700 block mb-1">면접 예상 질문 선택</label>
+              <select x-model="interviewQuestion" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs focus:outline-none focus:border-mint-500">
+                <option value="q1">Q1. 아동 간 다툼 발생 시 학부모 설명 방법</option>
+                <option value="q2">Q2. 퇴근 직전 학부모 하원 지연 시 대처</option>
+                <option value="q3">Q3. 원아의 급식/유아식 거부 상황 대처</option>
+              </select>
+            </div>
+
+            <!-- Selected Question Display -->
+            <div class="bg-slate-800 text-white p-3 rounded-xl text-xs space-y-1">
+              <p class="text-mint-300 font-semibold text-[11px]">면접관 질문:</p>
+              <p class="font-bold leading-relaxed" x-text="getQuestionText(interviewQuestion)">
+                "아동 간 다툼이 일어났을 때 학부모님께 어떻게 설명하시겠습니까?"
+              </p>
+            </div>
+
+            <!-- Answer Input Area -->
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label class="text-xs font-bold text-slate-700">나의 답변 작성</label>
+                <button @click="showToast('음성 인식 기능 시뮬레이션: 마이크가 활성화되었습니다 🎙️')" class="text-[11px] text-mint-600 font-semibold flex items-center">
+                  <i data-lucide="mic" class="w-3.5 h-3.5 mr-0.5"></i> 음성으로 말하기
+                </button>
+              </div>
+              <textarea 
+                x-model="interviewAnswerInput" 
+                rows="4" 
+                placeholder="답변 내용을 입력하세요..." 
+                class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs focus:outline-none focus:border-mint-500 focus:bg-white transition"
+              ></textarea>
+            </div>
+
+            <button 
+              @click="runInterviewFeedback()" 
+              :disabled="isInterviewEvaluating"
+              class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow-sm"
+            >
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-400" x-show="!isInterviewEvaluating"></i>
+              <i data-lucide="loader-2" class="w-4 h-4 animate-spin" x-show="isInterviewEvaluating"></i>
+              <span x-text="isInterviewEvaluating ? 'AI 평가 분석 중...' : 'AI 피드백 받기'">AI 피드백 받기</span>
+            </button>
+          </div>
+
+          <!-- Interview Feedback Result Card -->
+          <div x-show="interviewFeedback" class="bg-white rounded-2xl p-4 border border-mint-200 shadow-md space-y-3">
+            <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+              <span class="text-xs font-bold text-slate-800 flex items-center">
+                <i data-lucide="award" class="w-4 h-4 text-amber-500 mr-1"></i> AI 면접 평가 리포트
+              </span>
+              <span class="text-xs font-extrabold text-mint-600 bg-mint-50 border border-mint-200 px-2.5 py-0.5 rounded-full" x-text="'점수: ' + interviewFeedback.score + '점'">
+                점수: 92점
+              </span>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <div class="bg-emerald-50 p-2.5 rounded-xl border border-emerald-100">
+                <p class="font-bold text-emerald-700 mb-0.5">🟢 잘한 점 (Good):</p>
+                <p class="text-slate-700" x-text="interviewFeedback.good">학부모에 대한 공감과 사실 중심의 대처 방안이 명확합니다.</p>
+              </div>
+
+              <div class="bg-amber-50 p-2.5 rounded-xl border border-amber-100">
+                <p class="font-bold text-amber-700 mb-0.5">🟡 보완할 점 (Tip):</p>
+                <p class="text-slate-700" x-text="interviewFeedback.tip">원장님 및 선임 교사 보고 절차를 추가하면 더욱 완벽합니다.</p>
+              </div>
+
+              <div class="bg-mint-50/70 p-3 rounded-xl border border-mint-100">
+                <p class="font-bold text-mint-700 mb-1">✨ AI 추천 리라이팅 답변:</p>
+                <p class="text-slate-800 italic leading-relaxed" x-text="interviewFeedback.recommended">
+                  "아이들의 안전 상태를 최우선 확인한 후, 학부모님께 감정 배제 후 상황을 사실대로 전달하겠습니다. 동시에 재발 방지를 위한 관찰 계획을 설명드려 안심을 드리겠습니다."
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 4: 👤 [마이 / 필수 서류 / 적응] -->
+      <!-- ========================================== -->
+      <section x-show="tab === 'my'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" class="p-4 space-y-4">
+        
+        <!-- User Profile Card -->
+        <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-mint-500 to-amber-400 p-0.5 flex-shrink-0">
+              <div class="w-full h-full bg-white rounded-full flex items-center justify-center font-bold text-mint-700">
+                김
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center space-x-1.5">
+                <h3 class="font-bold text-slate-800 text-sm">김보육 선생님</h3>
+                <span class="text-[10px] bg-mint-100 text-mint-700 font-bold px-1.5 py-0.2 rounded">신입</span>
+              </div>
+              <p class="text-xs text-gray-500">안산시 단원구 · 보육교사 2급 자격 보유</p>
+            </div>
+          </div>
+
+          <button @click="showToast('프로필 수정 모드가 준비 중입니다.')" class="text-xs text-gray-400 hover:text-slate-700 p-1">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- MODE SWITCH BANNER (취업 준비 vs 취업 성공 적응 모드) -->
+        <div 
+          :class="isEmployedMode ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white' : 'bg-gradient-to-r from-slate-800 to-slate-900 text-white'"
+          class="p-4 rounded-2xl shadow-md transition-all duration-300"
+        >
+          <div class="flex justify-between items-center mb-2">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-white/20" x-text="isEmployedMode ? '🎉 취업 성공 축하합니다!' : '💪 취업 성공 준비중'">
+                취업 준비 모드
+              </span>
+              <h3 class="font-extrabold text-sm mt-1" x-text="isEmployedMode ? '신입교사 빠른 적응 모드' : '취업 필수 서류 준비 모드'">
+                취업 필수 서류 준비 모드
+              </h3>
+            </div>
+
+            <!-- Toggle Switch Button -->
+            <button 
+              @click="toggleEmployedMode()" 
+              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+              :class="isEmployedMode ? 'bg-white/30' : 'bg-mint-500'"
+            >
+              <span 
+                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                :class="isEmployedMode ? 'translate-x-5' : 'translate-x-0'"
+              ></span>
+            </button>
+          </div>
+
+          <p class="text-xs text-gray-200 leading-relaxed" x-text="isEmployedMode ? '첫 출근 준비물, 보육일지 작성법, 원내 에티켓 가이드를 확인할 수 있어요!' : '스위치를 누르면 취업 후 첫 출근 적응 가이드 모드로 전환됩니다.'">
+            스위치를 누르면 취업 후 첫 출근 적응 가이드 모드로 전환됩니다.
+          </p>
+        </div>
+
+        <!-- ================= MODE A: 취업 준비 필수 서류 체크리스트 ================= -->
+        <div x-show="!isEmployedMode" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold text-sm text-slate-800 flex items-center">
+              <i data-lucide="file-check-2" class="w-4 h-4 text-mint-600 mr-1.5"></i>
+              취업 준비 필수 서류 체크리스트
+            </h3>
+            <span class="text-xs font-bold text-mint-600" x-text="completedDocsCount + '/' + requiredDocs.length + ' 완료'">
+              1/4 완료
+            </span>
+          </div>
+
+          <!-- Document List -->
+          <div class="space-y-2">
+            <template x-for="(doc, idx) in requiredDocs" :key="doc.id">
+              <div 
+                @click="toggleDoc(doc.id)" 
+                class="flex items-center justify-between p-3 rounded-xl border transition cursor-pointer"
+                :class="doc.checked ? 'bg-mint-50/50 border-mint-200' : 'bg-gray-50 border-gray-100 hover:border-gray-200'"
+              >
+                <div class="flex items-center space-x-2.5">
+                  <div 
+                    class="w-5 h-5 rounded-md flex items-center justify-center border transition"
+                    :class="doc.checked ? 'bg-mint-500 border-mint-500 text-white' : 'bg-white border-gray-300'"
+                  >
+                    <i data-lucide="check" class="w-3.5 h-3.5" x-show="doc.checked"></i>
+                  </div>
+                  <span 
+                    class="text-xs font-semibold transition"
+                    :class="doc.checked ? 'line-through text-gray-400' : 'text-slate-700'"
+                    x-text="doc.title"
+                  >
+                    보육교사 자격증 복사본
+                  </span>
+                </div>
+                <span class="text-[10px] px-2 py-0.5 rounded font-medium bg-white border border-gray-200 text-gray-500" x-text="doc.tag">
+                  필수
+                </span>
+              </div>
+            </template>
+          </div>
+
+          <!-- Add New Document Input -->
+          <div class="flex items-center space-x-2 pt-1">
+            <input 
+              type="text" 
+              x-model="newDocTitle" 
+              @keydown.enter="addNewDoc()" 
+              placeholder="추가할 서류 입력 (예: 잠복결핵 검사지)..." 
+              class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-mint-500"
+            >
+            <button @click="addNewDoc()" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
+              추가
+            </button>
+          </div>
+        </div>
+
+        <!-- ================= MODE B: 취업 성공! 신입교사 적응 모드 ================= -->
+        <div x-show="isEmployedMode" class="space-y-3" x-transition>
+          
+          <!-- 첫 출근 준비물 체크리스트 -->
+          <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm space-y-2.5">
+            <h3 class="font-bold text-sm text-slate-800 flex items-center">
+              <i data-lucide="briefcase" class="w-4 h-4 text-amber-500 mr-1.5"></i>
+              🎒 첫 출근 준비물 체크리스트
+            </h3>
+            
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="p-2.5 bg-amber-50/60 rounded-xl border border-amber-100 flex items-center space-x-2">
+                <span>👟</span> <span class="font-medium text-slate-700">덧신 / 실내화</span>
+              </div>
+              <div class="p-2.5 bg-amber-50/60 rounded-xl border border-amber-100 flex items-center space-x-2">
+                <span>🥼</span> <span class="font-medium text-slate-700">보육용 앞치마</span>
+              </div>
+              <div class="p-2.5 bg-amber-50/60 rounded-xl border border-amber-100 flex items-center space-x-2">
+                <span>🖊️</span> <span class="font-medium text-slate-700">삼색펜 & 수첩</span>
+              </div>
+              <div class="p-2.5 bg-amber-50/60 rounded-xl border border-amber-100 flex items-center space-x-2">
+                <span>🏷️</span> <span class="font-medium text-slate-700">네임펜 & 포스트잇</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 보육일지 작성 꿀팁 가이드 -->
+          <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-2.5">
+            <h3 class="font-bold text-sm text-slate-800 flex items-center">
+              <i data-lucide="book-open" class="w-4 h-4 text-mint-600 mr-1.5"></i>
+              📖 보육일지 작성 핵심 꿀팁
+            </h3>
+
+            <div class="space-y-2 text-xs">
+              <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                <p class="font-bold text-mint-700 mb-0.5">1. 객관적 사실 위주 기록</p>
+                <p class="text-gray-600 leading-relaxed">"아이가 화를 냈다" (X) → "OO이가 또래의 블록을 빼앗으며 소리를 짚음" (O)</p>
+              </div>
+              <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                <p class="font-bold text-mint-700 mb-0.5">2. 발달단계 연계 평가</p>
+                <p class="text-gray-600 leading-relaxed">표준보육과정 신체·정서 영역 키워드를 일지에 자연스럽게 녹여 작성하세요.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 학부모 소통 매너 -->
+          <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-2">
+            <h3 class="font-bold text-sm text-slate-800 flex items-center">
+              <i data-lucide="message-square" class="w-4 h-4 text-amber-500 mr-1.5"></i>
+              💬 등하원 학부모 소통 매너
+            </h3>
+            <p class="text-xs text-gray-600 leading-relaxed bg-amber-50/50 p-3 rounded-xl border border-amber-100">
+              등원 시 <b>"오늘 OO이 표정이 너무 밝네요!"</b>와 같은 긍정 칭찬으로 시작하고, 하원 브리핑 시 <b>"식사+낮잠+특이사항"</b> 3요소를 간결히 전달하세요.
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- ========================================== -->
+    <!-- BOTTOM NAVIGATION BAR (FIXED) -->
+    <!-- ========================================== -->
+    <nav class="fixed bottom-0 left-0 right-0 z-30 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t border-gray-200 px-3 py-2 flex justify-around items-center shadow-lg">
+      
+      <!-- Tab 1: Home -->
+      <button 
+        @click="switchTab('home')" 
+        :class="tab === 'home' ? 'text-mint-600 font-bold' : 'text-gray-400 hover:text-gray-600'"
+        class="flex flex-col items-center space-y-1 transition py-1 px-3"
+      >
+        <i data-lucide="home" class="w-5 h-5"></i>
+        <span class="text-[11px]">홈</span>
+      </button>
+
+      <!-- Tab 2: Jobs -->
+      <button 
+        @click="switchTab('jobs')" 
+        :class="tab === 'jobs' ? 'text-mint-600 font-bold' : 'text-gray-400 hover:text-gray-600'"
+        class="flex flex-col items-center space-y-1 transition py-1 px-3 relative"
+      >
+        <i data-lucide="briefcase" class="w-5 h-5"></i>
+        <span class="text-[11px]">채용공고</span>
+        <span class="absolute top-0 right-2 w-2 h-2 bg-amber-500 rounded-full"></span>
+      </button>
+
+      <!-- Tab 3: AI Document & Interview -->
+      <button 
+        @click="switchTab('ai')" 
+        :class="tab === 'ai' ? 'text-mint-600 font-bold' : 'text-gray-400 hover:text-gray-600'"
+        class="flex flex-col items-center space-y-1 transition py-1 px-3"
+      >
+        <i data-lucide="sparkles" class="w-5 h-5"></i>
+        <span class="text-[11px]">AI 서류·면접</span>
+      </button>
+
+      <!-- Tab 4: My / Documents / Adaptation -->
+      <button 
+        @click="switchTab('my')" 
+        :class="tab === 'my' ? 'text-mint-600 font-bold' : 'text-gray-400 hover:text-gray-600'"
+        class="flex flex-col items-center space-y-1 transition py-1 px-3"
+      >
+        <i data-lucide="user" class="w-5 h-5"></i>
+        <span class="text-[11px]" x-text="isEmployedMode ? '적응가이드' : '마이·서류'">마이·서류</span>
+      </button>
+
+    </nav>
+
+    <!-- ========================================== -->
+    <!-- MODAL 1: JOB DETAIL POPUP -->
+    <!-- ========================================== -->
+    <div 
+      x-show="selectedJobDetail" 
+      x-transition:enter="transition ease-out duration-200"
+      x-transition:enter-start="opacity-0 scale-95"
+      x-transition:enter-end="opacity-100 scale-100"
+      x-transition:leave="transition ease-in duration-150"
+      x-transition:leave-start="opacity-100 scale-100"
+      x-transition:leave-end="opacity-0 scale-95"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+      style="display: none;"
+    >
+      <div @click.away="selectedJobDetail = null" class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+        <template x-if="selectedJobDetail">
+          <div>
+            <!-- Header -->
+            <div class="flex justify-between items-start mb-2">
+              <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-mint-100 text-mint-700" x-text="selectedJobDetail.facilityType">국공립</span>
+              <button @click="selectedJobDetail = null" class="text-gray-400 hover:text-gray-600 p-1">
+                <i data-lucide="x" class="w-5 h-5"></i>
+              </button>
+            </div>
+
+            <h3 class="font-extrabold text-base text-slate-800 mb-1" x-text="selectedJobDetail.name">시립안산어린이집</h3>
+            <p class="text-xs text-gray-500 mb-3 flex items-center">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 text-mint-600"></i>
+              <span x-text="selectedJobDetail.location">경기도 안산시 단원구 고잔동 123</span>
+            </p>
+
+            <!-- Match Score Box -->
+            <div class="bg-gradient-to-r from-mint-500 to-mint-600 text-white p-3 rounded-2xl flex justify-between items-center mb-4">
+              <div>
+                <p class="text-[11px] text-mint-100">김보육 선생님과 조건 매칭률</p>
+                <p class="text-lg font-black" x-text="selectedJobDetail.matchScore + '%'"></p>
+              </div>
+              <span class="text-xs bg-white/20 px-3 py-1 rounded-full border border-white/20 font-semibold">초고속 지원 가능</span>
+            </div>
+
+            <!-- Details Specs -->
+            <div class="space-y-2 text-xs border-y border-gray-100 py-3 mb-4">
+              <div class="flex justify-between">
+                <span class="text-gray-500">담당 연령:</span>
+                <span class="font-bold text-slate-800" x-text="selectedJobDetail.targetAge">만 2세 담임</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">고용 형태:</span>
+                <span class="font-bold text-slate-800" x-text="selectedJobDetail.jobType">정규직 (주 40시간)</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">예상 급여:</span>
+                <span class="font-bold text-mint-700" x-text="selectedJobDetail.salary">월 240~260만원</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">복리 후생:</span>
+                <span class="font-medium text-slate-700">4대보험, 중식제공, 명절휴가비</span>
+              </div>
+            </div>
+
+            <!-- Apply Simulation Button -->
+            <button 
+              @click="applyJob(selectedJobDetail.name)" 
+              class="w-full bg-mint-500 hover:bg-mint-600 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg shadow-mint-500/25 flex items-center justify-center space-x-1"
+            >
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span>원클릭 간편 지원하기</span>
+            </button>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL 2: TARGET GOAL EDIT MODAL -->
+    <!-- ========================================== -->
+    <div 
+      x-show="openGoalModal" 
+      x-transition 
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+      style="display: none;"
+    >
+      <div @click.away="openGoalModal = false" class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl space-y-4">
+        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+          <h3 class="font-bold text-sm text-slate-800">🎯 취업 희망 조건 설정</h3>
+          <button @click="openGoalModal = false" class="text-gray-400 hover:text-gray-600">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="font-bold text-gray-700 block mb-1">희망 지역</label>
+            <input type="text" x-model="userGoal.region" class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50 focus:bg-white focus:outline-none focus:border-mint-500">
+          </div>
+          <div>
+            <label class="font-bold text-gray-700 block mb-1">선호 시설 유형</label>
+            <select x-model="userGoal.type" class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50 focus:bg-white focus:outline-none focus:border-mint-500">
+              <option value="직장/국공립">직장/국공립</option>
+              <option value="국공립 단독">국공립 단독</option>
+              <option value="민간/가정">민간/가정</option>
+            </select>
+          </div>
+          <div>
+            <label class="font-bold text-gray-700 block mb-1">희망 담당 연령</label>
+            <select x-model="userGoal.ageGroup" class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50 focus:bg-white focus:outline-none focus:border-mint-500">
+              <option value="만 0세 (영아)">만 0세 (영아)</option>
+              <option value="만 1~2세">만 1~2세</option>
+              <option value="만 3~5세 (유아)">만 3~5세 (유아)</option>
+            </select>
+          </div>
+        </div>
+
+        <button @click="openGoalModal = false; showToast('취업 목표가 성공적으로 변경되었습니다!')" class="w-full bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-slate-700 transition">
+          저장하기
+        </button>
+      </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div 
+      x-show="toastMessage" 
+      x-transition:enter="transition ease-out duration-300"
+      x-transition:enter-start="opacity-0 translate-y-4"
+      x-transition:enter-end="opacity-100 translate-y-0"
+      x-transition:leave="transition ease-in duration-200"
+      x-transition:leave-start="opacity-100 translate-y-0"
+      x-transition:leave-end="opacity-0 translate-y-4"
+      class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 w-11/12 max-w-xs bg-slate-900/90 text-white text-xs font-semibold px-4 py-3 rounded-2xl shadow-xl backdrop-blur-md text-center border border-white/10"
+      style="display: none;"
+    >
+      <span x-text="toastMessage"></span>
+    </div>
+
+  </div>
+
+  <!-- APPLICATION JAVASCRIPT LOGIC -->
+  <script>
+    function appData() {
+      return {
+        // Active Navigation Tab
+        tab: 'home', // 'home' | 'jobs' | 'ai' | 'my'
+        
+        // Target Goal State
+        userGoal: {
+          region: '안산시 단원구',
+          type: '직장/국공립',
+          level: '신입',
+          ageGroup: '만 1~2세'
+        },
+        openGoalModal: false,
+
+        // Readiness Score
+        readinessPercentage: 68,
+
+        // Search & Filter for Job Tab
+        searchQuery: '',
+        selectedFilter: 'all',
+        bookmarks: [1], // ID list of bookmarked jobs
+
+        // AI Tab Sub-tab State
+        aiSubTab: 'convert', // 'convert' | 'tone' | 'interview'
+        
+        // AI Feature A State
+        rawExperienceInput: '',
+        isConverting: false,
+        convertedResult: '',
+
+        // AI Feature B State
+        toneType: 'public', // 'public' | 'corporate' | 'home'
+
+        // AI Feature C State
+        interviewQuestion: 'q1',
+        interviewAnswerInput: '',
+        isInterviewEvaluating: false,
+        interviewFeedback: null,
+
+        // Tab 4 State (Preparedness vs Employed Adaptation Mode)
+        isEmployedMode: false,
+        requiredDocs: [
+          { id: 1, title: '보육교사 자격증 복사본', checked: true, tag: '필수' },
+          { id: 2, title: '공무원 채용 신체검사서', checked: false, tag: '필수' },
+          { id: 3, title: '마약류 투약 검사서 (TBPE)', checked: false, tag: '필수' },
+          { id: 4, title: '성적증명서 및 졸업증명서', checked: false, tag: '서류' }
+        ],
+        newDocTitle: '',
+
+        // Job Listings Mock Data
+        jobsList: [
+          {
+            id: 1,
+            name: '시립안산어린이집 (국공립)',
+            facilityType: '국공립',
+            dDay: 'D-3',
+            location: '안산시 단원구 고잔동',
+            targetAge: '만 2세 담임',
+            jobType: '정규직',
+            salary: '월 240~260만원',
+            matchScore: 95,
+            tags: ['#희망지역일치', '#신입지원가능', '#통근25분']
+          },
+          {
+            id: 2,
+            name: '혜림직장어린이집 (직장)',
+            facilityType: '직장',
+            dDay: 'D-5',
+            location: '안산시 단원구 성곡동',
+            targetAge: '만 1세 담임',
+            jobType: '정규직',
+            salary: '월 260~280만원',
+            matchScore: 91,
+            tags: ['#교사대아동비율우수', '#복지최상', '#희망지역일치']
+          },
+          {
+            id: 3,
+            name: '아이꿈터 어린이집 (민간)',
+            facilityType: '민간',
+            dDay: 'D-12',
+            location: '안산시 상록구 이동',
+            targetAge: '만 3~4세 담임',
+            jobType: '정규직',
+            salary: '월 230~250만원',
+            matchScore: 84,
+            tags: ['#쾌적한환경', '#경력우대', '#신입가능']
+          },
+          {
+            id: 4,
+            name: '단원푸르지오 어린이집 (가정)',
+            facilityType: '가정',
+            dDay: '채용시마감',
+            location: '안산시 단원구 초지동',
+            targetAge: '만 0~1세 영아',
+            jobType: '정규직',
+            salary: '월 220~240만원',
+            matchScore: 80,
+            tags: ['#영아밀착보육', '#가족같은분위기', '#소수정원']
+          }
+        ],
+
+        // Job Detail Modal State
+        selectedJobDetail: null,
+
+        // Toast State
+        toastMessage: '',
+        toastTimeout: null,
+
+        // App Init Method
+        initApp() {
+          this.$nextTick(() => {
+            if (window.lucide) {
+              lucide.createIcons();
+            }
+          });
+
+          this.$watch('tab', () => {
+            setTimeout(() => {
+              if (window.lucide) lucide.createIcons();
+            }, 50);
+          });
+
+          this.$watch('aiSubTab', () => {
+            setTimeout(() => {
+              if (window.lucide) lucide.createIcons();
+            }, 50);
+          });
+        },
+
+        // Helper: Switch Navigation Tab
+        switchTab(targetTab) {
+          this.tab = targetTab;
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+
+        // Toast Notification Helper
+        showToast(msg) {
+          this.toastMessage = msg;
+          if (this.toastTimeout) clearTimeout(this.toastTimeout);
+          this.toastTimeout = setTimeout(() => {
+            this.toastMessage = '';
+          }, 2600);
+        },
+
+        // Featured Jobs (Top 2 for Home)
+        get featuredJobs() {
+          return this.jobsList.slice(0, 2);
+        },
+
+        // Filtered Jobs List for Job Tab
+        get filteredJobs() {
+          let list = this.jobsList;
+          if (this.searchQuery.trim() !== '') {
+            const q = this.searchQuery.toLowerCase();
+            list = list.filter(j => j.name.toLowerCase().includes(q) || j.location.toLowerCase().includes(q) || j.targetAge.toLowerCase().includes(q));
+          }
+
+          if (this.selectedFilter === 'ansan') {
+            list = list.filter(j => j.location.includes('안산시'));
+          } else if (this.selectedFilter === 'public') {
+            list = list.filter(j => j.facilityType === '국공립' || j.facilityType === '직장');
+          } else if (this.selectedFilter === 'beginner') {
+            list = list.filter(j => j.tags.includes('#신입지원가능') || j.tags.includes('#신입가능'));
+          } else if (this.selectedFilter === 'saved') {
+            list = list.filter(j => this.bookmarks.includes(j.id));
+          }
+
+          return list;
+        },
+
+        // Bookmark Toggle Action
+        toggleBookmark(jobId) {
+          if (this.bookmarks.includes(jobId)) {
+            this.bookmarks = this.bookmarks.filter(id => id !== jobId);
+            this.showToast('관심 공고에서 삭제되었습니다.');
+          } else {
+            this.bookmarks.push(jobId);
+            this.showToast('관심 공고로 등록되었습니다! ❤️');
+          }
+        },
+
+        // Open Job Detail Modal
+        openJobDetail(job) {
+          this.selectedJobDetail = job;
+          this.$nextTick(() => {
+            if (window.lucide) lucide.createIcons();
+          });
+        },
+
+        // Apply Job Simulation
+        applyJob(jobName) {
+          this.selectedJobDetail = null;
+          this.showToast(`🎉 ${jobName}에 간편 지원되었습니다!`);
+        },
+
+        // Run AI Experience Conversion
+        runAiConvert() {
+          if (!this.rawExperienceInput.trim()) {
+            this.showToast('경험 내용을 먼저 입력해주세요!');
+            return;
+          }
+          this.isConverting = true;
+          this.convertedResult = '';
+
+          setTimeout(() => {
+            this.isConverting = false;
+            if (this.rawExperienceInput.includes('카페')) {
+              this.convertedResult = '다양한 고객 대상 친절 응대 경험을 토대로 학부모와의 신뢰 기반 소통 능력 및 돌발 상황 시 침착하고 유연한 대처 역량을 배양함.';
+            } else if (this.rawExperienceInput.includes('도서관') || this.rawExperienceInput.includes('봉사')) {
+              this.convertedResult = '영유아 맞춤형 독서 유도 및 상호작용 경험을 통해 아동의 정서적 애착 형성 및 집중력을 끌어올리는 보육 현장 실무 능력을 갖춤.';
+            } else if (this.rawExperienceInput.includes('팀프로젝트') || this.rawExperienceInput.includes('갈등')) {
+              this.convertedResult = '팀원 간 원활한 경청 및 갈등 조율 리더십을 바탕으로, 어린이집 원내 교사 간 협력 관계 구축 및 조화로운 공통 보육목표 달성에 기여할 수 있음.';
+            } else {
+              this.convertedResult = `"${this.rawExperienceInput}" 경험을 보육 현장 가치와 연결하여, 아동 안전 관리 및 보육교사로서의 전문적인 세심함과 성실성을 완벽히 발휘할 수 있음.`;
+            }
+            this.showToast('AI 역량 문장 변환 완료!');
+            this.$nextTick(() => {
+              if (window.lucide) lucide.createIcons();
+            });
+          }, 800);
+        },
+
+        // Question helper for AI Interview
+        getQuestionText(qKey) {
+          if (qKey === 'q1') return '"아동 간 다툼이 일어났을 때 학부모님께 어떻게 설명하시겠습니까?"';
+          if (qKey === 'q2') return '"퇴근 직전 학부모님이 연락 없이 늦게 오셨을 때 어떻게 대처하시겠습니까?"';
+          if (qKey === 'q3') return '"원아가 특정 음식이나 유아식을 강력히 거부할 때 어떻게 지도하시겠습니까?"';
+          return '';
+        },
+
+        // Run AI Interview Feedback
+        runInterviewFeedback() {
+          if (!this.interviewAnswerInput.trim()) {
+            this.showToast('면접 답변을 먼저 작성해주세요!');
+            return;
+          }
+          this.isInterviewEvaluating = true;
+          this.interviewFeedback = null;
+
+          setTimeout(() => {
+            this.isInterviewEvaluating = false;
+            this.interviewFeedback = {
+              score: 92,
+              good: '학부모 입장에 대한 감정적 공감과 현장 중심의 일시·상황 설명 의도가 훌륭합니다.',
+              tip: '원장님 및 동료 교사 공유(상보고) 단계를 서술에 포함하면 책임감이 더욱 돋보입니다.',
+              recommended: '상처나 놀람이 없는지 아이 상태를 먼저 점검한 뒤, 학부모님께 감정을 배제한 사실 위주로 상황을 공유드리고, 원내 안전 재발 방지책을 차분히 설명드리겠습니다.'
+            };
+            this.showToast('AI 면접 평가 리포트 생성 완료!');
+            this.$nextTick(() => {
+              if (window.lucide) lucide.createIcons();
+            });
+          }, 900);
+        },
+
+        // Copy Text Helper
+        copyToClipboard(text) {
+          navigator.clipboard.writeText(text).then(() => {
+            this.showToast('클립보드에 복사되었습니다! 📋');
+          }).catch(() => {
+            this.showToast('복사 완료!');
+          });
+        },
+
+        // Toggle Checklist Document
+        toggleDoc(docId) {
+          const doc = this.requiredDocs.find(d => d.id === docId);
+          if (doc) {
+            doc.checked = !doc.checked;
+          }
+        },
+
+        // Completed Document Count
+        get completedDocsCount() {
+          return this.requiredDocs.filter(d => d.checked).length;
+        },
+
+        // Add Custom Document
+        addNewDoc() {
+          if (!this.newDocTitle.trim()) return;
+          this.requiredDocs.push({
+            id: Date.now(),
+            title: this.newDocTitle.trim(),
+            checked: false,
+            tag: '사용자'
+          });
+          this.newDocTitle = '';
+          this.showToast('새 서류 체크항목이 추가되었습니다.');
+        },
+
+        // Toggle Employed Adaptation Mode
+        toggleEmployedMode() {
+          this.isEmployedMode = !this.isEmployedMode;
+          if (this.isEmployedMode) {
+            this.showToast('🎉 취업 성공! 신입교사 적응 모드로 전환되었습니다.');
+          } else {
+            this.showToast('취업 준비 서류 모드로 전환되었습니다.');
+          }
+          this.$nextTick(() => {
+            if (window.lucide) lucide.createIcons();
+          });
+        }
+      };
+    }
+  </script>
+</body>
+</html>
